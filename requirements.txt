@@ -1,0 +1,15 @@
+Django>=5.2,<5.3
+djangorestframework>=3.15
+djangorestframework-simplejwt>=5.3
+drf-spectacular>=0.27
+celery[redis]>=5.4
+django-celery-beat>=2.7
+redis>=5.0
+mysqlclient>=2.2      # MySQL 8 driver (PyMySQL below is a pure-Python fallback)
+PyMySQL>=1.1
+requests>=2.32
+qrcode[pil]>=7.4
+Pillow>=10.4
+openpyxl>=3.1
+whitenoise>=6.7
+gunicorn>=22.0

@@ -1,0 +1,12 @@
+{% extends "emails/_layout.html" %}{% load eh %}
+{% block body %}
+<h1 style="font-size:20px;margin:0 0 8px">Refund {{ refund.get_status_display|lower }}</h1>
+<p style="color:#4b5563">Order <strong>{{ order.reference }}</strong> · {{ event.title }}</p>
+{% if refund.status == 'processed' %}
+<p>We've refunded <strong>{{ refund.amount|money0 }}</strong>. Depending on your bank it may take 5–10 working days to appear. Your tickets for this order are no longer valid.</p>
+{% elif refund.status == 'rejected' %}
+<p>The organizer declined this refund request.{% if refund.review_note %} Their note: “{{ refund.review_note }}”{% endif %}</p>
+{% else %}
+<p>Status: {{ refund.get_status_display }}.</p>
+{% endif %}
+{% endblock %}

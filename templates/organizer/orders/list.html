@@ -1,0 +1,32 @@
+{% extends "organizer/base.html" %}
+{% load eh %}
+{% block title %}Orders{% endblock %}
+{% block page_title %}Orders & payments{% endblock %}
+{% block page_actions %}
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'organizer:export_orders' 'csv' %}{% if f_event %}?event={{ f_event }}{% endif %}"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'organizer:export_orders' 'xlsx' %}{% if f_event %}?event={{ f_event }}{% endif %}"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+{% endblock %}
+{% block dash %}
+<form class="row g-2 mb-3" method="get">
+  <div class="col-sm-5"><select class="form-select form-select-sm" name="event" onchange="this.form.submit()"><option value="">All events</option>{% for e in events %}<option value="{{ e.pk }}" {% if f_event == e.pk|stringformat:'s' %}selected{% endif %}>{{ e.title }}</option>{% endfor %}</select></div>
+  <div class="col-sm-3"><select class="form-select form-select-sm" name="status" onchange="this.form.submit()"><option value="">Any status</option>{% for v, l in statuses %}<option value="{{ v }}" {% if f_status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+</form>
+<div class="card border-0 shadow-sm"><div class="card-body">
+<table class="table table-sm align-middle w-100" data-datatable data-order-col="6">
+  <thead><tr><th>Order</th><th>Buyer</th><th>Event</th><th>Qty</th><th class="text-end">Total</th><th>Status</th><th>Created</th></tr></thead>
+  <tbody>
+  {% for o in orders %}
+    <tr>
+      <td><a class="font-monospace small" href="{% url 'organizer:order_detail' o.reference %}">{{ o.reference }}</a>{% if o.needs_review %} <i class="bi bi-exclamation-triangle-fill text-warning" title="Needs review"></i>{% endif %}</td>
+      <td class="small">{{ o.buyer_name|default:"—" }}<div class="text-body-secondary">{{ o.buyer_email }}</div></td>
+      <td class="small">{{ o.event.title|truncatechars:36 }}</td>
+      <td>{{ o.quantity }}</td>
+      <td class="text-end" data-order="{{ o.total }}">{{ o.total|money0 }}</td>
+      <td><span class="badge text-bg-{{ o.status_badge }}">{{ o.get_status_display }}</span></td>
+      <td class="small" data-order="{{ o.created_at|date:'U' }}">{{ o.created_at|date:"j M Y H:i" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div></div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% load eh %}Hi {{ order.buyer_name }},
+
+Your order {{ order.reference }} for {{ event.title }} is confirmed.
+
+When:  {{ event.starts_at|date:"l, j F Y g:i A" }}
+Where: {% if event.is_online %}Online — {{ event.online_url }}{% else %}{{ event.venue.name }}, {{ event.venue.full_address }}{% endif %}
+Total: {{ order.total|money0 }}
+
+Your tickets (QR codes attached):
+{% for t in tickets %}- {{ t.ticket_type.name }} {{ t.short_code }}: {{ site_url }}{{ t.get_absolute_url }}
+{% endfor %}
+See you there!
+{{ site_name }}

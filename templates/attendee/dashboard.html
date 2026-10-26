@@ -1,0 +1,48 @@
+{% extends "attendee/base.html" %}
+{% load eh %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Hi, {{ user.display_name }} 👋{% endblock %}
+{% block page_actions %}<a href="{% url 'core:event_list' %}" class="btn btn-primary btn-sm"><i class="bi bi-search me-1"></i>Find events</a>{% endblock %}
+{% block dash %}
+{% if pending %}
+  <div class="alert alert-warning d-flex align-items-center gap-3">
+    <i class="bi bi-hourglass-split fs-4"></i>
+    <div class="flex-grow-1">You have tickets reserved for <strong>{{ pending.event.title }}</strong> — expires in <span class="font-monospace" data-countdown="{{ pending.seconds_left }}">--:--</span>.</div>
+    <a class="btn btn-sm btn-warning" href="{% url 'core:checkout' pending.reference %}">Complete payment</a>
+  </div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3"><div class="eh-stat"><span class="eh-stat-icon bg-primary-subtle text-primary"><i class="bi bi-calendar-check"></i></span><div><div class="eh-stat-value">{{ stats.upcoming }}</div><div class="eh-stat-label">Upcoming events</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="eh-stat"><span class="eh-stat-icon bg-success-subtle text-success"><i class="bi bi-ticket-perforated"></i></span><div><div class="eh-stat-value">{{ stats.tickets }}</div><div class="eh-stat-label">Tickets</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="eh-stat"><span class="eh-stat-icon bg-info-subtle text-info"><i class="bi bi-receipt"></i></span><div><div class="eh-stat-value">{{ stats.orders }}</div><div class="eh-stat-label">Paid orders</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="eh-stat"><span class="eh-stat-icon bg-warning-subtle text-warning"><i class="bi bi-star"></i></span><div><div class="eh-stat-value">{{ stats.attended }}</div><div class="eh-stat-label">Events attended</div></div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-7">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <h2 class="h6 fw-semibold mb-3">Coming up</h2>
+      {% for e in next_events %}
+        <a href="{{ e.get_absolute_url }}" class="d-flex gap-3 align-items-center py-2 text-decoration-none text-body {% if not forloop.last %}border-bottom{% endif %}">
+          <span class="eh-date-chip position-static"><span class="d-block small text-uppercase">{{ e.starts_at|date:"M" }}</span><span class="d-block fs-5 fw-bold lh-1">{{ e.starts_at|date:"d" }}</span></span>
+          <div><div class="fw-semibold">{{ e.title }}</div><div class="small text-body-secondary">{{ e.starts_at|time:"g:i A" }} · {% if e.is_online %}Online{% else %}{{ e.venue.name }}{% endif %} · <span data-relative="{{ e.starts_at|date:'c' }}"></span></div></div>
+        </a>
+      {% empty %}
+        <p class="text-body-secondary small mb-0">No upcoming events. <a href="{% url 'core:event_list' %}">Browse events</a></p>
+      {% endfor %}
+    </div></div>
+  </div>
+  <div class="col-xl-5">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <div class="d-flex justify-content-between"><h2 class="h6 fw-semibold mb-3">Recent orders</h2><a class="small" href="{% url 'attendee:orders' %}">All</a></div>
+      {% for o in recent_orders %}
+        <a href="{{ o.get_absolute_url }}" class="d-flex justify-content-between align-items-center py-2 small text-decoration-none text-body {% if not forloop.last %}border-bottom{% endif %}">
+          <div><span class="font-monospace">{{ o.reference }}</span><div class="text-body-secondary">{{ o.event.title|truncatechars:34 }}</div></div>
+          <div class="text-end"><div>{{ o.total|money0 }}</div><span class="badge text-bg-{{ o.status_badge }}">{{ o.get_status_display }}</span></div>
+        </a>
+      {% empty %}<p class="text-body-secondary small mb-0">No orders yet.</p>{% endfor %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}

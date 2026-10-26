@@ -1,0 +1,23 @@
+{% extends "attendee/base.html" %}
+{% load eh %}
+{% block title %}Payment history{% endblock %}
+{% block page_title %}Payment history{% endblock %}
+{% block dash %}
+<div class="card border-0 shadow-sm"><div class="table-responsive">
+<table class="table align-middle mb-0">
+  <thead class="table-light"><tr><th>Reference</th><th>Event</th><th>Amount</th><th>Channel</th><th>Status</th><th>Date</th></tr></thead>
+  <tbody>
+  {% for p in payments %}
+    <tr>
+      <td class="font-monospace small"><a href="{{ p.order.get_absolute_url }}">{{ p.reference }}</a></td>
+      <td>{{ p.order.event.title }}</td>
+      <td>{{ p.amount|money0 }}</td>
+      <td class="text-capitalize small">{{ p.channel|default:"—" }}</td>
+      <td><span class="badge text-bg-{% if p.status == 'success' %}success{% elif p.status == 'initialized' %}warning{% else %}danger{% endif %}">{{ p.get_status_display }}</span></td>
+      <td class="small text-body-secondary">{{ p.paid_at|default:p.created_at|date:"j M Y, H:i" }}</td>
+    </tr>
+  {% empty %}<tr><td colspan="6" class="text-center text-body-secondary py-4">No payments yet.</td></tr>{% endfor %}
+  </tbody>
+</table>
+</div></div>
+{% endblock %}

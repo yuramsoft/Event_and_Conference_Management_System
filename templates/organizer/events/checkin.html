@@ -1,0 +1,57 @@
+{% extends "organizer/base.html" %}
+{% load static %}
+{% block title %}Check-in – {{ event.title }}{% endblock %}
+{% block breadcrumb %}<a class="small" href="{% url 'organizer:event_manage' event.pk %}"><i class="bi bi-arrow-left"></i> {{ event.title }}</a>{% endblock %}
+{% block page_title %}Check-in{% endblock %}
+{% block page_actions %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'organizer:attendees' event.pk %}"><i class="bi bi-people me-1"></i>Attendee list</a>{% endblock %}
+{% block dash %}
+<div class="row g-4" id="checkin-app" data-event="{{ event.pk }}" data-scan-url="{% url 'api:checkin_scan' %}" data-stats-url="{% url 'api:checkin_stats' event.pk %}">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <div id="reader" class="eh-reader rounded-3 overflow-hidden bg-dark"></div>
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <button class="btn btn-primary" id="start-scan"><i class="bi bi-camera me-1"></i>Start camera</button>
+        <button class="btn btn-outline-secondary d-none" id="stop-scan"><i class="bi bi-stop-circle me-1"></i>Stop</button>
+        <div class="form-check form-switch ms-auto align-self-center"><input class="form-check-input" type="checkbox" id="sound-toggle" checked><label class="form-check-label small" for="sound-toggle">Sound</label></div>
+      </div>
+      <form class="mt-3" id="manual-form" autocomplete="off">
+        <label class="form-label small" for="manual-code">Or type the 8-character ticket code</label>
+        <div class="input-group">
+          <input class="form-control font-monospace text-uppercase" id="manual-code" placeholder="e.g. 4F7KQ2XA" maxlength="60">
+          <input class="form-control" id="gate" placeholder="Gate (optional)" style="max-width:150px">
+          <button class="btn btn-outline-primary">Check in</button>
+        </div>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-lg-6">
+    <div id="scan-result" class="eh-scan-result rounded-4 p-4 mb-3 text-center bg-body-tertiary" aria-live="assertive">
+      <i class="bi bi-qr-code-scan fs-1 text-body-secondary"></i>
+      <div class="fw-semibold mt-2">Ready to scan</div>
+      <div class="small text-body-secondary">Point the camera at a ticket QR code.</div>
+    </div>
+    <div class="row g-2 mb-3 text-center">
+      <div class="col-4"><div class="eh-stat flex-column py-3 gap-0"><div class="eh-stat-value" id="st-in">{{ stats.checked_in }}</div><div class="eh-stat-label">Inside</div></div></div>
+      <div class="col-4"><div class="eh-stat flex-column py-3 gap-0"><div class="eh-stat-value" id="st-left">{{ stats.remaining }}</div><div class="eh-stat-label">Expected</div></div></div>
+      <div class="col-4"><div class="eh-stat flex-column py-3 gap-0"><div class="eh-stat-value text-danger" id="st-rej">{{ stats.rejected }}</div><div class="eh-stat-label">Rejected scans</div></div></div>
+    </div>
+    <div class="progress mb-3" style="height:8px"><div class="progress-bar bg-success" id="st-bar" style="width:{{ stats.pct }}%"></div></div>
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <h2 class="h6 fw-semibold">Recent scans</h2>
+      <ul class="list-unstyled small mb-0" id="recent-scans">
+        {% for c in recent %}
+          <li class="d-flex justify-content-between py-1 border-bottom">
+            <span><i class="bi bi-{% if c.result == 'accepted' %}check-circle-fill text-success{% else %}x-circle-fill text-danger{% endif %} me-1"></i>{{ c.ticket.attendee_name|default:c.scanned_code }}</span>
+            <span class="text-body-secondary">{{ c.get_result_display }} · {{ c.created_at|time:"H:i" }}</span>
+          </li>
+        {% empty %}<li class="text-body-secondary" data-empty>No scans yet.</li>{% endfor %}
+      </ul>
+    </div></div>
+  </div>
+</div>
+{% csrf_token %}
+{% endblock %}
+{% block page_js %}
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="{% static 'js/checkin.js' %}"></script>
+{% endblock %}

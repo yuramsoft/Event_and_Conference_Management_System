@@ -1,0 +1,72 @@
+{% extends "organizer/base.html" %}
+{% load eh %}
+{% block title %}Organizer dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_actions %}
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'organizer:reports' %}"><i class="bi bi-bar-chart me-1"></i>Reports</a>
+  <a class="btn btn-primary btn-sm" href="{% url 'organizer:event_create' %}"><i class="bi bi-plus-lg me-1"></i>New event</a>
+{% endblock %}
+{% block dash %}
+{% if pending_refunds or review_orders %}
+  <div class="alert alert-warning d-flex flex-wrap gap-3 align-items-center small">
+    <i class="bi bi-exclamation-triangle fs-5"></i>
+    {% if pending_refunds %}<span><strong>{{ pending_refunds }}</strong> refund request{{ pending_refunds|pluralize }} waiting. <a href="{% url 'organizer:refunds' %}" class="alert-link">Review</a></span>{% endif %}
+    {% if review_orders %}<span><strong>{{ review_orders }}</strong> order{{ review_orders|pluralize }} paid after tickets sold out. <a href="{% url 'organizer:orders' %}?review=1" class="alert-link">See orders</a></span>{% endif %}
+  </div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3"><div class="eh-stat"><span class="eh-stat-icon bg-success-subtle text-success"><i class="bi bi-cash-coin"></i></span><div><div class="eh-stat-value">{{ s.revenue|money0 }}</div><div class="eh-stat-label">Total revenue</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="eh-stat"><span class="eh-stat-icon bg-primary-subtle text-primary"><i class="bi bi-ticket-perforated"></i></span><div><div class="eh-stat-value">{{ s.tickets_sold }}</div><div class="eh-stat-label">Tickets issued</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="eh-stat"><span class="eh-stat-icon bg-info-subtle text-info"><i class="bi bi-person-check"></i></span><div><div class="eh-stat-value">{{ s.checked_in }}</div><div class="eh-stat-label">Checked in</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="eh-stat"><span class="eh-stat-icon bg-warning-subtle text-warning"><i class="bi bi-broadcast"></i></span><div><div class="eh-stat-value">{{ s.events_live }}<small class="fs-6 text-body-secondary"> / {{ s.events_total }}</small></div><div class="eh-stat-label">Live events</div></div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-8">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="h6 fw-semibold mb-0">Sales, last 30 days</h2>
+        <span class="small text-body-secondary">{{ s.orders }} paid orders · {{ s.pending_orders }} awaiting payment</span>
+      </div>
+      <div style="height:280px"><canvas id="salesChart" data-chart='{{ chart }}' data-currency="{{ CURRENCY_SYMBOL }}"></canvas></div>
+    </div></div>
+  </div>
+  <div class="col-xl-4">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <div class="d-flex justify-content-between"><h2 class="h6 fw-semibold mb-3">Upcoming events</h2><a href="{% url 'organizer:events' %}" class="small">All</a></div>
+      {% for e in upcoming %}
+        <a href="{% url 'organizer:event_manage' e.pk %}" class="d-block py-2 text-decoration-none text-body {% if not forloop.last %}border-bottom{% endif %}">
+          <div class="d-flex justify-content-between"><span class="fw-semibold small text-truncate me-2">{{ e.title }}</span><span class="badge text-bg-{% if e.status == 'published' %}success{% elif e.status == 'draft' %}secondary{% else %}danger{% endif %}">{{ e.get_status_display }}</span></div>
+          <div class="small text-body-secondary">{{ e.starts_at|date:"D j M, g:i A" }}</div>
+          {% with sold=e.tickets_sold cap=e.total_capacity %}
+          <div class="progress mt-1" style="height:5px" title="{{ sold }} / {{ cap }} sold"><div class="progress-bar" style="width:{% widthratio sold cap|default:1 100 %}%"></div></div>
+          {% endwith %}
+        </a>
+      {% empty %}
+        <p class="small text-body-secondary">No upcoming events. <a href="{% url 'organizer:event_create' %}">Create one</a>.</p>
+      {% endfor %}
+    </div></div>
+  </div>
+  <div class="col-12">
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <div class="d-flex justify-content-between"><h2 class="h6 fw-semibold mb-3">Latest orders</h2><a href="{% url 'organizer:orders' %}" class="small">All orders</a></div>
+      <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+        <thead><tr><th>Order</th><th>Buyer</th><th>Event</th><th class="text-end">Total</th><th>Status</th><th>When</th></tr></thead>
+        <tbody>
+        {% for o in recent_orders %}
+          <tr>
+            <td><a class="font-monospace small" href="{% url 'organizer:order_detail' o.reference %}">{{ o.reference }}</a></td>
+            <td class="small">{{ o.buyer_name|default:"—" }}<div class="text-body-secondary">{{ o.buyer_email }}</div></td>
+            <td class="small">{{ o.event.title|truncatechars:40 }}</td>
+            <td class="text-end">{{ o.total|money0 }}</td>
+            <td><span class="badge text-bg-{{ o.status_badge }}">{{ o.get_status_display }}</span></td>
+            <td class="small text-body-secondary">{{ o.created_at|timesince }} ago</td>
+          </tr>
+        {% empty %}<tr><td colspan="6" class="text-center small text-body-secondary py-3">No orders yet.</td></tr>{% endfor %}
+        </tbody>
+      </table></div>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,5 @@
+Reminder: {{ event.title }} starts {{ event.starts_at|date:"l, j F g:i A" }}.
+{% if event.is_online %}Join: {{ event.online_url }}{% else %}Venue: {{ event.venue.name }}, {{ event.venue.full_address }}{% endif %}
+
+Your tickets: {{ site_url }}{% url 'attendee:tickets' %}
+Agenda: {{ site_url }}{% url 'core:event_agenda' event.slug %}

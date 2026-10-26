@@ -1,0 +1,15 @@
+{% extends "emails/_layout.html" %}{% load eh %}
+{% block body %}
+<h1 style="font-size:20px;margin:0 0 8px">You're going to {{ event.title }}! 🎉</h1>
+<p style="margin:0 0 16px;color:#4b5563">Hi {{ order.buyer_name }}, your order <strong>{{ order.reference }}</strong> is confirmed.</p>
+<table width="100%" style="background:#f9fafb;border-radius:8px;padding:12px;font-size:14px;margin-bottom:16px">
+  <tr><td><strong>When</strong></td><td>{{ event.starts_at|date:"l, j F Y · g:i A" }}</td></tr>
+  <tr><td><strong>Where</strong></td><td>{% if event.is_online %}Online — <a href="{{ event.online_url }}">join link</a>{% else %}{{ event.venue.name }}, {{ event.venue.full_address }}{% endif %}</td></tr>
+  <tr><td><strong>Total paid</strong></td><td>{{ order.total|money0 }}</td></tr>
+</table>
+<p style="font-size:14px">Your QR tickets are attached. You can also open each one here:</p>
+<ul style="font-size:14px;padding-left:18px">
+{% for t in tickets %}<li><a href="{{ site_url }}{{ t.get_absolute_url }}" style="color:#4f46e5">{{ t.ticket_type.name }} – {{ t.short_code }}</a></li>{% endfor %}
+</ul>
+<p style="font-size:13px;color:#6b7280">Each person needs their own ticket at the door. Forward a ticket link to share it.</p>
+{% endblock %}

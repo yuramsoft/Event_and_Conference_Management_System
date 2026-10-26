@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+.venv/
+venv/
+.idea/
+.vscode/
+.coverage
+htmlcov/
+celerybeat-schedule*

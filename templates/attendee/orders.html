@@ -1,0 +1,24 @@
+{% extends "attendee/base.html" %}
+{% load eh %}
+{% block title %}My orders{% endblock %}
+{% block page_title %}My orders{% endblock %}
+{% block dash %}
+<div class="card border-0 shadow-sm"><div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead class="table-light"><tr><th>Order</th><th>Event</th><th>Tickets</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+  <tbody>
+  {% for o in orders %}
+    <tr>
+      <td><a class="font-monospace" href="{{ o.get_absolute_url }}">{{ o.reference }}</a></td>
+      <td>{{ o.event.title }}</td>
+      <td>{{ o.quantity }}</td>
+      <td>{{ o.total|money0 }}</td>
+      <td><span class="badge text-bg-{{ o.status_badge }}">{{ o.get_status_display }}</span>
+        {% if o.reservation_active %}<a class="small ms-1" href="{% url 'core:checkout' o.reference %}">Pay now</a>{% endif %}</td>
+      <td class="small text-body-secondary">{{ o.created_at|date:"j M Y" }}</td>
+    </tr>
+  {% empty %}<tr><td colspan="6" class="text-center text-body-secondary py-4">No orders yet.</td></tr>{% endfor %}
+  </tbody>
+</table>
+</div></div>
+{% endblock %}

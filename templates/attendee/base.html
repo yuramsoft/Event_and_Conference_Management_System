@@ -1,0 +1,15 @@
+{% extends "partials/dash_layout.html" %}
+{% load eh %}
+{% block sidebar_label %}My account{% endblock %}
+{% block sidebar %}
+  <a class="nav-link {% active 'attendee:dashboard' %}" href="{% url 'attendee:dashboard' %}"><i class="bi bi-grid me-2"></i>Dashboard</a>
+  <a class="nav-link {% active 'attendee:my_events' %}" href="{% url 'attendee:my_events' %}"><i class="bi bi-calendar-event me-2"></i>My events</a>
+  <a class="nav-link {% active 'attendee:ticket' %}" href="{% url 'attendee:tickets' %}"><i class="bi bi-qr-code me-2"></i>My tickets</a>
+  <a class="nav-link {% active 'attendee:order' %}" href="{% url 'attendee:orders' %}"><i class="bi bi-receipt me-2"></i>My orders</a>
+  <a class="nav-link {% active 'attendee:payments' %}" href="{% url 'attendee:payments' %}"><i class="bi bi-credit-card me-2"></i>Payment history</a>
+  <a class="nav-link {% active 'accounts:profile' %}" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>Profile</a>
+  {% if user.is_organizer %}
+    <hr>
+    <a class="nav-link" href="{% url 'organizer:dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Organizer dashboard</a>
+  {% endif %}
+{% endblock %}

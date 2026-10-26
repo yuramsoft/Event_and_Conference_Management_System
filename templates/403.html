@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Not allowed{% endblock %}
+{% block content %}
+<div class="container py-5 text-center"><div class="display-1 fw-bold text-primary">403</div>
+<p class="lead">You don't have access to this page.</p>
+<p class="text-body-secondary">Organizer tools need an organizer account.</p>
+<a href="{% url 'core:home' %}" class="btn btn-primary">Home</a></div>
+{% endblock %}

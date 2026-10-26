@@ -1,0 +1,6 @@
+{% extends "emails/_layout.html" %}{% load eh %}
+{% block body %}
+<h1 style="font-size:20px;margin:0 0 8px">Sales for {{ day|date:"l, j F" }}</h1>
+<p>{{ orders }} paid order{{ orders|pluralize }} · <strong>{{ revenue|money0 }}</strong></p>
+<p>The attached spreadsheet lists the day's orders. <a href="{{ site_url }}{% url 'organizer:reports' %}" style="color:#4f46e5">Open reports</a></p>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "organizer/base.html" %}
+{% load eh %}
+{% block title %}Revenue reports{% endblock %}
+{% block page_title %}Revenue reports{% endblock %}
+{% block page_actions %}
+  <div class="btn-group btn-group-sm">
+    <a class="btn btn-outline-secondary {% if days == 7 %}active{% endif %}" href="?days=7">7d</a>
+    <a class="btn btn-outline-secondary {% if days == 30 %}active{% endif %}" href="?days=30">30d</a>
+    <a class="btn btn-outline-secondary {% if days == 90 %}active{% endif %}" href="?days=90">90d</a>
+    <a class="btn btn-outline-secondary {% if days == 365 %}active{% endif %}" href="?days=365">1y</a>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'organizer:export_orders' 'xlsx' %}"><i class="bi bi-file-earmark-excel me-1"></i>Export orders</a>
+{% endblock %}
+{% block dash %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3"><div class="eh-stat"><div><div class="eh-stat-value">{{ s.revenue|money0 }}</div><div class="eh-stat-label">Gross revenue</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="eh-stat"><div><div class="eh-stat-value">{{ s.orders }}</div><div class="eh-stat-label">Paid orders</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="eh-stat"><div><div class="eh-stat-value">{{ s.tickets_sold }}</div><div class="eh-stat-label">Tickets issued</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="eh-stat"><div><div class="eh-stat-value text-danger">{{ s.refunded|money0 }}</div><div class="eh-stat-label">Refunded</div></div></div></div>
+</div>
+<div class="card border-0 shadow-sm mb-4"><div class="card-body">
+  <h2 class="h6 fw-semibold">Daily revenue & orders — last {{ days }} days</h2>
+  <div style="height:300px"><canvas id="salesChart" data-chart='{{ chart }}' data-currency="{{ CURRENCY_SYMBOL }}"></canvas></div>
+</div></div>
+<div class="row g-4">
+  <div class="col-xl-6">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <h2 class="h6 fw-semibold">By event</h2>
+      <table class="table table-sm small align-middle mb-0">
+        <thead><tr><th>Event</th><th>Date</th><th class="text-end">Orders</th><th class="text-end">Revenue</th></tr></thead>
+        <tbody>{% for e in by_event %}<tr><td><a href="{% url 'organizer:event_manage' e.pk %}">{{ e.title|truncatechars:40 }}</a></td><td>{{ e.starts_at|date:"j M Y" }}</td><td class="text-end">{{ e.paid_orders }}</td><td class="text-end fw-semibold">{{ e.revenue|default:0|money0 }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-body-secondary">No events.</td></tr>{% endfor %}</tbody>
+      </table>
+    </div></div>
+  </div>
+  <div class="col-xl-6">
+    <div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <h2 class="h6 fw-semibold">By ticket type</h2>
+      <table class="table table-sm small align-middle mb-0">
+        <thead><tr><th>Ticket</th><th>Price</th><th>Sold</th><th class="text-end">Revenue</th></tr></thead>
+        <tbody>{% for t in by_type %}<tr><td>{{ t.name }}<div class="text-body-secondary">{{ t.event|truncatechars:34 }}</div></td><td>{{ t.price|money }}</td>
+          <td style="min-width:110px">{{ t.sold }}/{{ t.quantity }}<div class="progress" style="height:4px"><div class="progress-bar" style="width:{{ t.pct }}%"></div></div></td>
+          <td class="text-end fw-semibold">{{ t.revenue|money0 }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-body-secondary">No ticket types.</td></tr>{% endfor %}</tbody>
+      </table>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

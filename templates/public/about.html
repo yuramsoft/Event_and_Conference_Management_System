@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}For organizers{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:900px">
+  <h1 class="fw-bold mb-3">Run your event end to end</h1>
+  <p class="lead text-body-secondary">Publish an event page, sell tickets through Paystack, and check people in at the door with any phone camera.</p>
+  <div class="row g-4 my-4">
+    <div class="col-md-6"><h2 class="h6 fw-semibold"><i class="bi bi-calendar-week text-primary me-2"></i>Schedules & speakers</h2><p class="small text-body-secondary">Build a multi-track agenda and speaker profiles.</p></div>
+    <div class="col-md-6"><h2 class="h6 fw-semibold"><i class="bi bi-ticket-detailed text-primary me-2"></i>Ticket tiers & discounts</h2><p class="small text-body-secondary">Early bird, VIP, per-order limits and promo codes.</p></div>
+    <div class="col-md-6"><h2 class="h6 fw-semibold"><i class="bi bi-qr-code-scan text-primary me-2"></i>Live check-in</h2><p class="small text-body-secondary">Scan QR codes from any phone; duplicates are flagged instantly.</p></div>
+    <div class="col-md-6"><h2 class="h6 fw-semibold"><i class="bi bi-bar-chart text-primary me-2"></i>Revenue reports</h2><p class="small text-body-secondary">Daily sales charts plus CSV and Excel exports.</p></div>
+  </div>
+  <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">Create an organizer account</a>
+</div>
+{% endblock %}

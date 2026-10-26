@@ -1,0 +1,2 @@
+{% load eh %}Sales for {{ day|date:"l, j F" }}: {{ orders }} paid order{{ orders|pluralize }}, {{ revenue|money0 }}.
+Spreadsheet attached. Reports: {{ site_url }}{% url 'organizer:reports' %}

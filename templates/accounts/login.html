@@ -1,0 +1,22 @@
+{% extends "accounts/_auth_base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block card %}
+<h1 class="h4 fw-bold mb-1">Welcome back</h1>
+<p class="text-body-secondary small mb-4">Sign in to see your tickets or manage your events.</p>
+<form method="post" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger small">Email and password didn't match.</div>{% endif %}
+  <div class="mb-3">
+    <label class="form-label" for="id_username">Email</label>
+    {{ form.username }}
+  </div>
+  <div class="mb-2">
+    <label class="form-label" for="id_password">Password</label>
+    {{ form.password }}
+  </div>
+  <div class="text-end mb-3"><a class="small" href="{% url 'accounts:password_reset' %}">Forgot password?</a></div>
+  <input type="hidden" name="next" value="{{ next }}">
+  <button class="btn btn-primary w-100">Sign in</button>
+</form>
+<p class="small text-center mt-4 mb-0">New here? <a href="{% url 'accounts:signup' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create an account</a></p>
+{% endblock %}

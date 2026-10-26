@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Speakers – {{ event.title }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <a href="{{ event.get_absolute_url }}" class="small"><i class="bi bi-arrow-left"></i> Back to event</a>
+  <h1 class="h2 fw-bold mt-2 mb-4">Speakers at {{ event.title }}</h1>
+  <div class="row g-4">
+    {% for sp in speakers %}
+      <div class="col-md-6">
+        {% include "public/_speaker_card.html" with full=True %}
+      </div>
+    {% empty %}
+      <p class="text-body-secondary">Speakers will be announced soon.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

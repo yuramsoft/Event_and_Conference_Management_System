@@ -1,0 +1,31 @@
+{% if form.non_field_errors %}<div class="alert alert-danger small">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+{% for field in form.hidden_fields %}{{ field }}{% endfor %}
+<div class="row g-3">
+{% for field in form.visible_fields %}
+  <div class="{% if field.field.widget.input_type == 'checkbox' or field.field.widget.attrs.rows or field.name in wide_fields %}col-12{% else %}col-md-6{% endif %}">
+    {% if field.field.widget.input_type == 'checkbox' and not field.field.widget.allow_multiple_selected %}
+      <div class="form-check form-switch mt-2">
+        {{ field }}
+        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      </div>
+    {% elif field.field.widget.allow_multiple_selected and field.field.widget.input_type == 'checkbox' %}
+      <label class="form-label d-block">{{ field.label }}</label>
+      <div class="eh-checklist">
+        {% for cb in field %}
+          <div class="form-check form-check-inline">{{ cb.tag }}<label class="form-check-label" for="{{ cb.id_for_label }}">{{ cb.choice_label }}</label></div>
+        {% empty %}<span class="small text-body-secondary">Nothing to choose yet.</span>{% endfor %}
+      </div>
+    {% elif field.field.widget.input_type == 'radio' %}
+      <label class="form-label d-block">{{ field.label }}</label>
+      {% for rb in field %}
+        <div class="form-check form-check-inline">{{ rb.tag }}<label class="form-check-label" for="{{ rb.id_for_label }}">{{ rb.choice_label }}</label></div>
+      {% endfor %}
+    {% else %}
+      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="text-body-secondary small">(optional)</span>{% endif %}</label>
+      {{ field }}
+    {% endif %}
+    {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+    {% for e in field.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}
+  </div>
+{% endfor %}
+</div>

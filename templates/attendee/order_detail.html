@@ -1,0 +1,58 @@
+{% extends "attendee/base.html" %}
+{% load eh %}
+{% block title %}Order {{ order.reference }}{% endblock %}
+{% block breadcrumb %}<a class="small" href="{% url 'attendee:orders' %}"><i class="bi bi-arrow-left"></i> Orders</a>{% endblock %}
+{% block page_title %}Order <span class="font-monospace">{{ order.reference }}</span> <span class="badge text-bg-{{ order.status_badge }} fs-6 align-middle">{{ order.get_status_display }}</span>{% endblock %}
+{% block page_actions %}{% if order.reservation_active %}<a class="btn btn-primary btn-sm" href="{% url 'core:checkout' order.reference %}">Complete payment</a>{% endif %}{% endblock %}
+{% block dash %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <h2 class="h6 fw-semibold">{{ order.event.title }}</h2>
+      <p class="small text-body-secondary">{{ order.event.starts_at|date:"l, j F Y · g:i A" }} · {% if order.event.is_online %}Online{% else %}{{ order.event.venue.full_address }}{% endif %}</p>
+      {% if order.is_paid and order.event.is_online and order.event.online_url %}
+        <a class="btn btn-sm btn-success mb-3" href="{{ order.event.online_url }}" target="_blank" rel="noopener"><i class="bi bi-camera-video me-1"></i>Join online event</a>
+      {% endif %}
+      <table class="table table-sm small mb-0">
+        {% for i in items %}<tr><td>{{ i.quantity }} × {{ i.ticket_type.name }}</td><td class="text-end">{{ i.line_total|money0 }}</td></tr>{% endfor %}
+        {% if order.discount_amount %}<tr class="text-success"><td>Discount</td><td class="text-end">−{{ order.discount_amount|money0 }}</td></tr>{% endif %}
+        <tr class="fw-bold"><td>Total</td><td class="text-end">{{ order.total|money0 }}</td></tr>
+      </table>
+    </div></div>
+
+    {% if tickets %}
+    <h2 class="h6 fw-semibold">Tickets</h2>
+    <div class="row g-3">
+      {% for t in tickets %}
+        <div class="col-sm-6"><a href="{{ t.get_absolute_url }}" class="card border-0 shadow-sm text-decoration-none text-body"><div class="card-body d-flex gap-3 align-items-center">
+          <div class="eh-qr-mini">{% qr t.code %}</div>
+          <div><div class="fw-semibold">{{ t.ticket_type.name }}</div><div class="small font-monospace">{{ t.short_code }}</div><span class="badge text-bg-{% if t.status == 'valid' %}success{% elif t.status == 'used' %}secondary{% else %}danger{% endif %}">{{ t.get_status_display }}</span></div>
+        </div></a></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm mb-4"><div class="card-body">
+      <h2 class="h6 fw-semibold">Payments</h2>
+      {% for p in payments %}
+        <div class="d-flex justify-content-between small py-1 border-bottom"><span class="font-monospace">{{ p.reference }}</span><span>{{ p.get_status_display }}{% if p.channel %} · {{ p.channel }}{% endif %}</span></div>
+      {% empty %}<p class="small text-body-secondary mb-0">{% if order.total == 0 %}Free order — no payment needed.{% else %}No payment attempts yet.{% endif %}</p>{% endfor %}
+    </div></div>
+
+    <div class="card border-0 shadow-sm"><div class="card-body">
+      <h2 class="h6 fw-semibold">Refunds</h2>
+      {% for r in refunds %}
+        <div class="small py-1"><span class="badge text-bg-{{ r.status_badge }}">{{ r.get_status_display }}</span> {{ r.amount|money0 }} · {{ r.created_at|date:"j M" }}{% if r.review_note %}<div class="text-body-secondary">“{{ r.review_note }}”</div>{% endif %}</div>
+      {% endfor %}
+      {% if can_refund %}
+        <form method="post" action="{% url 'attendee:refund_request' order.reference %}" class="mt-2">{% csrf_token %}
+          <label class="form-label small" for="reason">Request a refund</label>
+          <textarea class="form-control form-control-sm mb-2" id="reason" name="reason" rows="2" placeholder="Why do you need a refund?" required></textarea>
+          <button class="btn btn-outline-danger btn-sm" data-confirm="Request a refund for this order? Your tickets will be cancelled if approved.">Request refund</button>
+        </form>
+      {% elif not refunds %}<p class="small text-body-secondary mb-0">No refunds.</p>{% endif %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}

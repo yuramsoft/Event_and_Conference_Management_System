@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load eh %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block meta_description %}{{ event.summary }}{% endblock %}
+{% block content %}
+{% if preview %}
+  <div class="alert alert-warning rounded-0 mb-0 text-center small">
+    <i class="bi bi-eye me-1"></i>Preview — this event is <strong>{{ event.get_status_display|lower }}</strong> and not visible to the public.
+    <a href="{% url 'organizer:event_manage' event.pk %}" class="alert-link ms-2">Manage event</a>
+  </div>
+{% endif %}
+
+<section class="eh-event-hero">
+  {% if event.banner %}<img src="{{ event.banner.url }}" alt="" class="eh-event-hero-img">{% else %}<div class="eh-event-hero-img eh-card-placeholder" data-seed="{{ event.pk }}"></div>{% endif %}
+  <div class="container position-relative py-5">
+    <div class="eh-event-hero-card p-4 p-lg-5 rounded-4 shadow">
+      {% if event.category %}<span class="badge text-bg-primary mb-2">{{ event.category.name }}</span>{% endif %}
+      {% if event.status == 'cancelled' %}<span class="badge text-bg-danger mb-2">Cancelled</span>{% endif %}
+      <h1 class="fw-bold display-6 mb-2">{{ event.title }}</h1>
+      <p class="lead text-body-secondary mb-4">{{ event.summary }}</p>
+      <div class="row g-3 small">
+        <div class="col-sm-6 d-flex gap-2"><i class="bi bi-calendar3 fs-5 text-primary"></i><div><strong>{{ event.starts_at|date:"l, j F Y" }}</strong><br>{{ event.starts_at|time:"g:i A" }} – {% if event.ends_at.date != event.starts_at.date %}{{ event.ends_at|date:"j M, g:i A" }}{% else %}{{ event.ends_at|time:"g:i A" }}{% endif %}</div></div>
+        <div class="col-sm-6 d-flex gap-2">
+          {% if event.is_online %}<i class="bi bi-camera-video fs-5 text-primary"></i><div><strong>Online event</strong><br>Link shared after purchase</div>
+          {% else %}<i class="bi bi-geo-alt fs-5 text-primary"></i><div><strong>{{ event.venue.name }}</strong><br>{{ event.venue.full_address }}{% if event.venue.map_url %} · <a href="{{ event.venue.map_url }}" target="_blank" rel="noopener">Map</a>{% endif %}</div>{% endif %}
+        </div>
+      </div>
+      <a href="#tickets" class="btn btn-primary btn-lg mt-4 d-lg-none w-100">Get tickets</a>
+    </div>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row g-5">
+    <div class="col-lg-7">
+      <ul class="nav nav-underline mb-4" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-about" type="button">About</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-agenda" type="button">Agenda{% if agenda_days %} <span class="badge text-bg-light">{{ event.sessions.count }}</span>{% endif %}</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-speakers" type="button">Speakers{% if speakers %} <span class="badge text-bg-light">{{ speakers|length }}</span>{% endif %}</button></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="tab-about">
+          <div class="eh-prose">{{ event.description|linebreaks }}</div>
+          <div class="d-flex flex-wrap gap-3 small text-body-secondary mt-4">
+            <span><i class="bi bi-person-circle me-1"></i>Organized by {{ event.organizer.organization|default:event.organizer.display_name }}</span>
+            {% if event.contact_email %}<span><i class="bi bi-envelope me-1"></i><a href="mailto:{{ event.contact_email }}">{{ event.contact_email }}</a></span>{% endif %}
+          </div>
+        </div>
+        <div class="tab-pane fade" id="tab-agenda">
+          {% include "public/_agenda.html" %}
+          {% if agenda_days %}<a class="btn btn-sm btn-outline-secondary mt-3" href="{% url 'core:event_agenda' event.slug %}"><i class="bi bi-printer me-1"></i>Printable agenda</a>{% endif %}
+        </div>
+        <div class="tab-pane fade" id="tab-speakers">
+          <div class="row g-3">
+            {% for sp in speakers %}<div class="col-md-6">{% include "public/_speaker_card.html" %}</div>
+            {% empty %}<p class="text-body-secondary">Speakers will be announced soon.</p>{% endfor %}
+          </div>
+          {% if speakers %}<a class="btn btn-sm btn-outline-secondary mt-3" href="{% url 'core:event_speakers' event.slug %}">All speaker bios</a>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm sticky-lg-top eh-ticket-panel" id="tickets" style="top:90px">
+        <div class="card-body p-4">
+          <h2 class="h5 fw-bold mb-3"><i class="bi bi-ticket-perforated me-2 text-primary"></i>Tickets</h2>
+          {% if not event.is_on_sale %}
+            <div class="alert alert-secondary small mb-0">
+              {% if event.status == 'cancelled' %}This event was cancelled.{% elif event.is_past %}This event has ended.{% else %}Tickets aren't on sale yet.{% endif %}
+            </div>
+          {% else %}
+          <form method="post" action="{% url 'core:reserve' event.slug %}" id="ticket-form" data-quote-url="/api/events/{{ event.slug }}/quote/">
+            {% csrf_token %}
+            {% for tt in ticket_types %}
+              <div class="eh-tt d-flex align-items-center justify-content-between gap-3 py-3 {% if not forloop.last %}border-bottom{% endif %}">
+                <div class="flex-grow-1">
+                  <div class="fw-semibold">{{ tt.name }}</div>
+                  {% if tt.description %}<div class="small text-body-secondary">{{ tt.description }}</div>{% endif %}
+                  <div class="small mt-1">
+                    <span class="fw-semibold">{{ tt.price|money }}</span>
+                    {% with st=tt.sale_status %}
+                      {% if st == "On sale" %}{% if tt.available <= 10 %}<span class="text-danger ms-2">Only {{ tt.available }} left</span>{% endif %}
+                      {% else %}<span class="badge text-bg-secondary ms-2">{{ st }}</span>{% endif %}
+                    {% endwith %}
+                  </div>
+                </div>
+                {% if tt.on_sale and tt.available %}
+                  <div class="eh-stepper input-group input-group-sm" style="width:116px">
+                    <button class="btn btn-outline-secondary" type="button" data-step="-1" aria-label="Fewer">−</button>
+                    <input type="number" class="form-control text-center" name="qty_{{ tt.pk }}" value="0" min="0"
+                           max="{% if tt.available < tt.max_per_order %}{{ tt.available }}{% else %}{{ tt.max_per_order }}{% endif %}"
+                           data-min="{{ tt.min_per_order }}" data-price="{{ tt.price }}" data-tt="{{ tt.pk }}" aria-label="{{ tt.name }} quantity">
+                    <button class="btn btn-outline-secondary" type="button" data-step="1" aria-label="More">+</button>
+                  </div>
+                {% endif %}
+              </div>
+            {% empty %}
+              <p class="text-body-secondary small">No tickets available.</p>
+            {% endfor %}
+
+            <div class="mt-3">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                <input class="form-control text-uppercase" name="discount_code" id="discount-code" placeholder="Discount code">
+                <button class="btn btn-outline-primary" type="button" id="apply-discount">Apply</button>
+              </div>
+              <div class="small mt-1" id="discount-msg"></div>
+            </div>
+
+            <dl class="row small mt-3 mb-0 eh-totals">
+              <dt class="col-6 fw-normal text-body-secondary">Subtotal</dt><dd class="col-6 text-end mb-1" id="q-subtotal">{{ CURRENCY_SYMBOL }}0</dd>
+              <dt class="col-6 fw-normal text-body-secondary">Discount</dt><dd class="col-6 text-end mb-1 text-success" id="q-discount">—</dd>
+              <dt class="col-6 fs-6">Total</dt><dd class="col-6 text-end fs-5 fw-bold mb-0" id="q-total">{{ CURRENCY_SYMBOL }}0</dd>
+            </dl>
+            <div class="small text-danger mt-2" id="q-error"></div>
+            <button class="btn btn-primary btn-lg w-100 mt-3" id="reserve-btn" disabled>Select tickets</button>
+            <p class="small text-body-secondary text-center mt-2 mb-0"><i class="bi bi-hourglass-split me-1"></i>We'll hold your tickets for {{ RESERVATION_MINUTES }} minutes.</p>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script>window.EH_CURRENCY = "{{ CURRENCY_SYMBOL }}";</script>{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "organizer/base.html" %}
+{% block title %}Events{% endblock %}
+{% block page_title %}Events{% endblock %}
+{% block page_actions %}
+<div class="btn-group btn-group-sm">
+  <a class="btn btn-outline-secondary {% if not request.GET.status %}active{% endif %}" href="?">All</a>
+  <a class="btn btn-outline-secondary {% if request.GET.status == 'published' %}active{% endif %}" href="?status=published">Live</a>
+  <a class="btn btn-outline-secondary {% if request.GET.status == 'draft' %}active{% endif %}" href="?status=draft">Drafts</a>
+</div>
+<a class="btn btn-primary btn-sm" href="{% url 'organizer:event_create' %}"><i class="bi bi-plus-lg me-1"></i>New event</a>
+{% endblock %}
+{% block dash %}
+<div class="card border-0 shadow-sm"><div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+  <thead class="table-light"><tr><th>Event</th><th>Date</th><th>Venue</th><th>Tickets</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for e in events %}
+    <tr>
+      <td><a class="fw-semibold" href="{% url 'organizer:event_manage' e.pk %}">{{ e.title }}</a></td>
+      <td class="small">{{ e.starts_at|date:"D j M Y, g:i A" }}</td>
+      <td class="small">{% if e.is_online %}Online{% else %}{{ e.venue.name|default:"—" }}{% endif %}</td>
+      <td>{{ e.n_tickets }}</td>
+      <td><span class="badge text-bg-{% if e.status == 'published' %}success{% elif e.status == 'draft' %}secondary{% else %}danger{% endif %}">{{ e.get_status_display }}</span>{% if e.is_past %} <span class="badge text-bg-light border">Ended</span>{% endif %}</td>
+      <td class="text-end text-nowrap">
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'organizer:event_edit' e.pk %}" title="Edit"><i class="bi bi-pencil"></i></a>
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'organizer:checkin' e.pk %}" title="Check-in"><i class="bi bi-qr-code-scan"></i></a>
+        <a class="btn btn-sm btn-outline-secondary" href="{{ e.get_absolute_url }}" title="View page" target="_blank"><i class="bi bi-box-arrow-up-right"></i></a>
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6" class="text-center py-5 text-body-secondary">No events yet. <a href="{% url 'organizer:event_create' %}">Create your first event</a>.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div></div>
+{% endblock %}

@@ -1,0 +1,2 @@
+{% load eh %}Refund {{ refund.get_status_display|lower }} for order {{ order.reference }} ({{ event.title }}).
+{% if refund.status == 'processed' %}Amount: {{ refund.amount|money0 }}. Allow 5–10 working days. Tickets on this order are cancelled.{% elif refund.status == 'rejected' %}The organizer declined this request.{% if refund.review_note %} Note: {{ refund.review_note }}{% endif %}{% endif %}

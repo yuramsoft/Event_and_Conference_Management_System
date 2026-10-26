@@ -1,0 +1,13 @@
+{% extends "accounts/_auth_base.html" %}
+{% block title %}Create account{% endblock %}
+{% block width %}6{% endblock %}
+{% block card %}
+<h1 class="h4 fw-bold mb-1">Create your account</h1>
+<p class="text-body-secondary small mb-4">Buy tickets faster, or start selling tickets for your own events.</p>
+<form method="post" novalidate>
+  {% csrf_token %}
+  {% include "partials/form_fields.html" %}
+  <button class="btn btn-primary w-100 mt-4">Create account</button>
+</form>
+<p class="small text-center mt-4 mb-0">Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a></p>
+{% endblock %}

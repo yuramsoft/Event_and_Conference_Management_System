@@ -1,0 +1,28 @@
+{% extends "partials/dash_layout.html" %}
+{% load eh %}
+{% block sidebar_label %}Organizer{% endblock %}
+{% block sidebar %}
+  <a class="nav-link {% active 'organizer:dashboard' %}" href="{% url 'organizer:dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+  <a class="nav-link {% active 'organizer:event' 'organizer:ticket' 'organizer:session' 'organizer:schedule' 'organizer:discount' 'organizer:attendees' 'organizer:checkin' %}" href="{% url 'organizer:events' %}"><i class="bi bi-calendar-event me-2"></i>Events</a>
+  <a class="nav-link {% active 'organizer:venue' %}" href="{% url 'organizer:venues' %}"><i class="bi bi-geo-alt me-2"></i>Venues</a>
+  <a class="nav-link {% active 'organizer:speaker' %}" href="{% url 'organizer:speakers' %}"><i class="bi bi-mic me-2"></i>Speakers</a>
+  <a class="nav-link {% active 'organizer:order' %}" href="{% url 'organizer:orders' %}"><i class="bi bi-receipt me-2"></i>Orders & payments</a>
+  <a class="nav-link {% active 'organizer:refund' %}" href="{% url 'organizer:refunds' %}"><i class="bi bi-arrow-counterclockwise me-2"></i>Refunds</a>
+  <a class="nav-link {% active 'organizer:reports' %}" href="{% url 'organizer:reports' %}"><i class="bi bi-bar-chart-line me-2"></i>Revenue reports</a>
+  <a class="nav-link {% active 'organizer:audit' %}" href="{% url 'organizer:audit' %}"><i class="bi bi-journal-text me-2"></i>Audit log</a>
+  <hr>
+  <a class="nav-link {% active 'accounts:profile' %}" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>Profile</a>
+  <a class="nav-link" href="{% url 'attendee:dashboard' %}"><i class="bi bi-ticket me-2"></i>My tickets</a>
+  <div class="mt-auto pt-3"><a class="btn btn-primary w-100" href="{% url 'organizer:event_create' %}"><i class="bi bi-plus-lg me-1"></i>New event</a></div>
+{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+{% endblock %}
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
+{% load static %}<script src="{% static 'js/organizer.js' %}"></script>
+{% block page_js %}{% endblock %}
+{% endblock %}

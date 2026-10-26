@@ -1,0 +1,30 @@
+{% extends "organizer/base.html" %}
+{% block title %}Attendees – {{ event.title }}{% endblock %}
+{% block breadcrumb %}<a class="small" href="{% url 'organizer:event_manage' event.pk %}"><i class="bi bi-arrow-left"></i> {{ event.title }}</a>{% endblock %}
+{% block page_title %}Attendees{% endblock %}
+{% block page_actions %}
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'organizer:export_attendees' event.pk 'csv' %}"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'organizer:export_attendees' event.pk 'xlsx' %}"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+  <a class="btn btn-primary btn-sm" href="{% url 'organizer:checkin' event.pk %}"><i class="bi bi-qr-code-scan me-1"></i>Check-in</a>
+{% endblock %}
+{% block dash %}
+<p class="small text-body-secondary">{{ checkin.total }} active tickets · {{ checkin.checked_in }} checked in ({{ checkin.pct }}%)</p>
+<div class="card border-0 shadow-sm"><div class="card-body">
+<table class="table table-sm align-middle w-100" data-datatable>
+  <thead><tr><th>Code</th><th>Attendee</th><th>Email</th><th>Ticket</th><th>Order</th><th>Status</th><th>Checked in</th></tr></thead>
+  <tbody>
+  {% for t in tickets %}
+    <tr>
+      <td class="font-monospace small">{{ t.short_code }}</td>
+      <td>{{ t.attendee_name }}</td>
+      <td class="small">{{ t.attendee_email }}</td>
+      <td class="small">{{ t.ticket_type.name }}</td>
+      <td><a class="font-monospace small" href="{% url 'organizer:order_detail' t.order.reference %}">{{ t.order.reference }}</a></td>
+      <td><span class="badge text-bg-{% if t.status == 'valid' %}success{% elif t.status == 'used' %}secondary{% else %}danger{% endif %}">{{ t.get_status_display }}</span></td>
+      <td class="small" data-order="{{ t.checked_in_at|date:'U' }}">{{ t.checked_in_at|date:"j M H:i"|default:"—" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div></div>
+{% endblock %}

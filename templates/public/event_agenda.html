@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Agenda – {{ event.title }}{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:860px">
+  <a href="{{ event.get_absolute_url }}" class="small d-print-none"><i class="bi bi-arrow-left"></i> Back to event</a>
+  <h1 class="h2 fw-bold mt-2">{{ event.title }}</h1>
+  <p class="text-body-secondary">{{ event.starts_at|date:"l, j F Y" }}{% if event.venue %} · {{ event.venue.name }}{% endif %}</p>
+  <button class="btn btn-sm btn-outline-secondary d-print-none" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+  {% include "public/_agenda.html" %}
+</div>
+{% endblock %}

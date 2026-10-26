@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load eh %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:980px">
+  <a href="{{ order.event.get_absolute_url }}" class="small"><i class="bi bi-arrow-left"></i> {{ order.event.title }}</a>
+  <h1 class="h3 fw-bold mt-2 mb-4">Checkout</h1>
+
+  {% if order.reservation_active %}
+    <div class="alert alert-primary d-flex align-items-center gap-3" role="status">
+      <i class="bi bi-hourglass-split fs-4"></i>
+      <div class="flex-grow-1">Your tickets are reserved. Complete payment within
+        <strong class="font-monospace" data-countdown="{{ order.seconds_left }}" data-expired-text="Reservation expired">--:--</strong>.
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-warning">This reservation has {% if order.status == 'pending' %}expired{% else %}been {{ order.get_status_display|lower }}{% endif %}.
+      <a href="{{ order.event.get_absolute_url }}#tickets" class="alert-link">Select tickets again</a>.</div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="h5 fw-semibold mb-3">Your details</h2>
+          <form method="post" id="checkout-form" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label" for="buyer_name">Full name</label>
+              <input class="form-control" id="buyer_name" name="buyer_name" value="{{ order.buyer_name }}" required autocomplete="name">
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="buyer_email">Email</label>
+              <input class="form-control" id="buyer_email" type="email" name="buyer_email" value="{{ order.buyer_email }}" required autocomplete="email">
+              <div class="form-text">Your tickets will be sent here.</div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label" for="buyer_phone">Phone <span class="text-body-secondary">(optional)</span></label>
+              <input class="form-control" id="buyer_phone" name="buyer_phone" value="{{ order.buyer_phone }}" autocomplete="tel">
+            </div>
+            {% if not user.is_authenticated %}
+              <p class="small text-body-secondary"><i class="bi bi-info-circle me-1"></i>No account needed. <a href="{% url 'accounts:login' %}?next={{ request.path }}">Sign in</a> to keep tickets in your dashboard.</p>
+            {% endif %}
+            <button class="btn btn-primary btn-lg w-100" {% if not order.reservation_active %}disabled{% endif %}>
+              {% if order.total == 0 %}<i class="bi bi-check2-circle me-1"></i>Confirm free registration
+              {% else %}<i class="bi bi-lock-fill me-1"></i>Pay {{ order.total|money0 }} with Paystack{% endif %}
+            </button>
+            {% if order.total > 0 and not paystack_ready %}
+              <p class="small text-danger mt-2 mb-0">Paystack keys are not configured on this server (set PAYSTACK_SECRET_KEY).</p>
+            {% endif %}
+          </form>
+          {% if order.is_pending %}
+          <form method="post" action="{% url 'core:cancel_checkout' order.reference %}" class="text-center mt-3">
+            {% csrf_token %}<button class="btn btn-link btn-sm text-body-secondary">Cancel and release tickets</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card border-0 bg-body-tertiary">
+        <div class="card-body p-4">
+          <h2 class="h6 fw-semibold text-uppercase text-body-secondary mb-3">Order {{ order.reference }}</h2>
+          <div class="fw-semibold">{{ order.event.title }}</div>
+          <div class="small text-body-secondary mb-3">{{ order.event.starts_at|date:"D, j M Y · g:i A" }}</div>
+          {% for item in items %}
+            <div class="d-flex justify-content-between small py-1"><span>{{ item.quantity }} × {{ item.ticket_type.name }}</span><span>{{ item.line_total|money0 }}</span></div>
+          {% endfor %}
+          <hr>
+          <div class="d-flex justify-content-between small"><span>Subtotal</span><span>{{ order.subtotal|money0 }}</span></div>
+          {% if order.discount_amount %}<div class="d-flex justify-content-between small text-success"><span>Discount ({{ order.discount_code.code }})</span><span>−{{ order.discount_amount|money0 }}</span></div>{% endif %}
+          <div class="d-flex justify-content-between fw-bold fs-5 mt-2"><span>Total</span><span>{{ order.total|money0 }}</span></div>
+        </div>
+      </div>
+      <p class="small text-body-secondary mt-3"><i class="bi bi-shield-lock me-1"></i>Payments are processed by Paystack. We never see your card details.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

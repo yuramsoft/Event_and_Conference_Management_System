@@ -1,0 +1,22 @@
+{% extends "organizer/base.html" %}
+{% block title %}Audit log{% endblock %}
+{% block page_title %}Audit log{% endblock %}
+{% block dash %}
+<div class="card border-0 shadow-sm"><div class="card-body">
+<table class="table table-sm align-middle w-100" data-datatable data-order-col="0">
+  <thead><tr><th>When</th><th>Action</th><th>By</th><th>Target</th><th>Details</th><th>IP</th></tr></thead>
+  <tbody>
+  {% for a in logs %}
+    <tr>
+      <td class="small text-nowrap" data-order="{{ a.created_at|date:'U' }}">{{ a.created_at|date:"j M Y H:i:s" }}</td>
+      <td><code>{{ a.action }}</code></td>
+      <td class="small">{{ a.actor|default:"system" }}</td>
+      <td class="small">{{ a.target_type }}{% if a.target_id %} #{{ a.target_id }}{% endif %}</td>
+      <td class="small text-body-secondary">{{ a.description }}{% for k, v in a.metadata.items %} {{ k }}={{ v }}{% endfor %}</td>
+      <td class="small text-body-secondary">{{ a.ip_address|default:"" }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div></div>
+{% endblock %}

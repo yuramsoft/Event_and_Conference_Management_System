@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-{% block width %}5{% endblock %}">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-lg-5">
+          {% block card %}{% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

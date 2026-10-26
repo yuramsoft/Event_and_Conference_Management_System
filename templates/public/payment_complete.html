@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load eh %}
+{% block title %}Order {{ order.reference }}{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:820px">
+  {% if order.is_paid and not order.needs_review %}
+    <div class="text-center mb-5">
+      <div class="eh-success-icon mx-auto mb-3"><i class="bi bi-check-lg"></i></div>
+      <h1 class="h3 fw-bold">You're going to {{ order.event.title }}!</h1>
+      <p class="text-body-secondary">Order <strong>{{ order.reference }}</strong> · confirmation sent to {{ order.buyer_email }}</p>
+    </div>
+    <div class="row g-3">
+      {% for t in tickets %}
+        <div class="col-md-6">
+          <a href="{{ t.get_absolute_url }}" class="card border-0 shadow-sm text-decoration-none text-body h-100">
+            <div class="card-body d-flex gap-3 align-items-center">
+              <div class="eh-qr-mini">{% qr t.code %}</div>
+              <div><div class="fw-semibold">{{ t.ticket_type.name }}</div><div class="small text-body-secondary font-monospace">{{ t.short_code }}</div><div class="small text-primary mt-1">Open ticket <i class="bi bi-arrow-right"></i></div></div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4 d-flex justify-content-center gap-2 flex-wrap">
+      {% if user.is_authenticated %}<a href="{% url 'attendee:tickets' %}" class="btn btn-primary">Go to my tickets</a>
+      {% else %}<a href="{% url 'accounts:signup' %}" class="btn btn-primary">Create an account to keep your tickets</a>{% endif %}
+      <a href="{% url 'core:event_list' %}" class="btn btn-outline-secondary">Browse more events</a>
+    </div>
+  {% elif order.needs_review %}
+    <div class="alert alert-warning">
+      <h1 class="h5">Payment received, but tickets sold out</h1>
+      Your reservation lapsed before payment completed and the last tickets went to someone else. A full refund has been queued — the organizer has been notified.
+    </div>
+  {% elif order.is_pending %}
+    <div class="text-center">
+      <div class="spinner-border text-primary mb-3"></div>
+      <h1 class="h4 fw-bold">Confirming your payment…</h1>
+      <p class="text-body-secondary">This page refreshes automatically. If you closed the Paystack window, you can <a href="{% url 'core:checkout' order.reference %}">try again</a>.</p>
+    </div>
+    <script>setTimeout(function(){location.reload();}, 4000);</script>
+  {% else %}
+    <div class="alert alert-secondary">This order is <strong>{{ order.get_status_display|lower }}</strong>. <a href="{{ order.event.get_absolute_url }}">Back to event</a></div>
+  {% endif %}
+</div>
+{% endblock %}

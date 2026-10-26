@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Not found{% endblock %}
+{% block content %}
+<div class="container py-5 text-center"><div class="display-1 fw-bold text-primary">404</div>
+<p class="lead">We couldn't find that page.</p><a href="{% url 'core:event_list' %}" class="btn btn-primary">Browse events</a></div>
+{% endblock %}

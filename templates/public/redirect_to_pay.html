@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Redirecting to payment{% endblock %}
+{% block content %}
+<div class="container py-5 text-center" style="max-width:520px">
+  <div class="spinner-border text-primary mb-3" role="status"></div>
+  <h1 class="h5">Taking you to secure payment…</h1>
+  <form method="post" action="{% url 'payments:pay' order.reference %}" id="pay-form">
+    {% csrf_token %}
+    <noscript><button class="btn btn-primary mt-3">Continue</button></noscript>
+  </form>
+</div>
+<script>document.getElementById('pay-form').submit();</script>
+{% endblock %}

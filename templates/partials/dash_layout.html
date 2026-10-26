@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body_class %}eh-dash-body{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="eh-dash">
+  <aside class="eh-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="dashSidebar">
+    <div class="offcanvas-header d-lg-none">
+      <h5 class="offcanvas-title">Menu</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#dashSidebar" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column p-3">
+      <div class="small text-uppercase text-body-secondary fw-semibold px-2 mb-2">{% block sidebar_label %}{% endblock %}</div>
+      <nav class="nav nav-pills flex-column gap-1">{% block sidebar %}{% endblock %}</nav>
+    </div>
+  </aside>
+  <div class="eh-dash-main">
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+      <button class="btn btn-outline-secondary btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashSidebar" aria-label="Open menu"><i class="bi bi-list"></i></button>
+      <div class="me-auto">
+        {% block breadcrumb %}{% endblock %}
+        <h1 class="h4 fw-bold mb-0">{% block page_title %}{% endblock %}</h1>
+      </div>
+      <div class="d-flex flex-wrap gap-2">{% block page_actions %}{% endblock %}</div>
+    </div>
+    {% block dash %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

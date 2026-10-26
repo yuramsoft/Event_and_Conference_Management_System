@@ -1,0 +1,1 @@
+The attendee export for {{ event.title }} is attached.

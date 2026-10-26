@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Browse events{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+    <div>
+      <h1 class="h2 fw-bold mb-1">Events</h1>
+      <p class="text-body-secondary mb-0">{{ page.paginator.count }} upcoming event{{ page.paginator.count|pluralize }}{% if q %} matching “{{ q }}”{% endif %}</p>
+    </div>
+  </div>
+
+  <form class="row g-2 mb-4 eh-filters" method="get">
+    <div class="col-12 col-md-4"><input class="form-control" name="q" value="{{ q }}" placeholder="Search title, topic or city"></div>
+    <div class="col-6 col-md-3">
+      <select class="form-select" name="category" onchange="this.form.submit()">
+        <option value="">All categories</option>
+        {% for c in categories %}<option value="{{ c.slug }}" {% if c.slug == cat %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <select class="form-select" name="when" onchange="this.form.submit()">
+        <option value="">Any time</option>
+        <option value="week" {% if when == 'week' %}selected{% endif %}>Next 7 days</option>
+        <option value="month" {% if when == 'month' %}selected{% endif %}>Next 30 days</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <select class="form-select" name="mode" onchange="this.form.submit()">
+        <option value="">In-person & online</option>
+        <option value="in-person" {% if mode == 'in-person' %}selected{% endif %}>In-person</option>
+        <option value="online" {% if mode == 'online' %}selected{% endif %}>Online</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-1 d-grid"><button class="btn btn-primary"><i class="bi bi-funnel"></i></button></div>
+  </form>
+
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+    {% for event in page %}
+      <div class="col">{% include "partials/event_card.html" %}</div>
+    {% empty %}
+      <div class="col-12">
+        <div class="text-center p-5 bg-body-tertiary rounded-4">
+          <i class="bi bi-calendar-x fs-1 text-body-secondary"></i>
+          <p class="mt-2 mb-0">No events match your filters. <a href="{% url 'core:event_list' %}">Clear filters</a></p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% include "partials/pagination.html" %}
+</div>
+{% endblock %}

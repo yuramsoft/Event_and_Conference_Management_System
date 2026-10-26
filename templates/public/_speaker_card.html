@@ -1,0 +1,17 @@
+<div class="d-flex gap-3 align-items-start p-3 rounded-4 bg-body-tertiary h-100">
+  {% if sp.photo %}
+    <img src="{{ sp.photo.url }}" alt="{{ sp.name }}" class="rounded-circle object-fit-cover" width="64" height="64">
+  {% else %}
+    <span class="eh-avatar eh-avatar-lg">{{ sp.initials }}</span>
+  {% endif %}
+  <div>
+    <div class="fw-semibold">{{ sp.name }}</div>
+    <div class="small text-body-secondary">{{ sp.title }}{% if sp.company %}, {{ sp.company }}{% endif %}</div>
+    {% if full and sp.bio %}<p class="small mt-2 mb-1">{{ sp.bio|linebreaksbr }}</p>{% endif %}
+    <div class="d-flex gap-2 mt-1">
+      {% if sp.linkedin %}<a href="{{ sp.linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>{% endif %}
+      {% if sp.x_handle %}<a href="https://x.com/{{ sp.x_handle|cut:'@' }}" target="_blank" rel="noopener" aria-label="X"><i class="bi bi-twitter-x"></i></a>{% endif %}
+      {% if sp.website %}<a href="{{ sp.website }}" target="_blank" rel="noopener" aria-label="Website"><i class="bi bi-globe"></i></a>{% endif %}
+    </div>
+  </div>
+</div>

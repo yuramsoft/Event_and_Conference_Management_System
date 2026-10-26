@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load eh static %}
+{% block title %}Ticket {{ ticket.short_code }}{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="container py-4 py-md-5" style="max-width:440px">
+  <div class="eh-ticket card border-0 shadow">
+    <div class="eh-ticket-head p-4 text-white">
+      <div class="small opacity-75 text-uppercase">{{ ticket.ticket_type.name }}</div>
+      <h1 class="h4 fw-bold mb-1">{{ event.title }}</h1>
+      <div class="small">{{ event.starts_at|date:"D, j M Y · g:i A" }}</div>
+      <div class="small">{% if event.is_online %}Online{% else %}{{ event.venue.name }}, {{ event.venue.city }}{% endif %}</div>
+    </div>
+    <div class="eh-ticket-perf"></div>
+    <div class="card-body text-center p-4">
+      {% if ticket.status == 'valid' %}
+        <div id="ticket-qr" class="d-inline-block p-3 bg-white rounded-3" data-code="{{ ticket.code }}" aria-label="Ticket QR code">
+          <noscript>{% qr ticket.code %}</noscript>
+        </div>
+        <p class="small text-body-secondary mt-2 mb-0">Show this at the entrance. Turn your screen brightness up.</p>
+      {% elif ticket.status == 'used' %}
+        <div class="py-4"><i class="bi bi-check2-circle display-3 text-success"></i><p class="fw-semibold mb-0">Checked in {{ ticket.checked_in_at|date:"j M, g:i A" }}</p></div>
+      {% else %}
+        <div class="py-4"><i class="bi bi-x-octagon display-3 text-danger"></i><p class="fw-semibold mb-0">This ticket was cancelled</p></div>
+      {% endif %}
+      <div class="font-monospace fs-4 fw-bold letter-spaced mt-3">{{ ticket.short_code }}</div>
+      <hr>
+      <div class="row text-start small g-2">
+        <div class="col-6"><div class="text-body-secondary">Attendee</div><div class="fw-semibold">{{ ticket.attendee_name }}</div></div>
+        <div class="col-6"><div class="text-body-secondary">Order</div><div class="fw-semibold font-monospace">{{ ticket.order.reference }}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex gap-2 justify-content-center mt-3 d-print-none">
+    <button class="btn btn-outline-secondary btn-sm" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print</button>
+    {% if user.is_authenticated %}<a class="btn btn-outline-secondary btn-sm" href="{% url 'attendee:tickets' %}">All tickets</a>{% endif %}
+    <a class="btn btn-outline-secondary btn-sm" href="{{ event.get_absolute_url }}">Event page</a>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  (function () {
+    var el = document.getElementById('ticket-qr');
+    if (!el || typeof QRCode === 'undefined') return;
+    new QRCode(el, { text: el.dataset.code, width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
+  })();
+</script>
+{% endblock %}

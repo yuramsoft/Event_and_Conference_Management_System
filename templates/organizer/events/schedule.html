@@ -1,0 +1,35 @@
+{% extends "organizer/base.html" %}
+{% block title %}Schedule – {{ event.title }}{% endblock %}
+{% block breadcrumb %}<a class="small" href="{% url 'organizer:event_manage' event.pk %}"><i class="bi bi-arrow-left"></i> {{ event.title }}</a>{% endblock %}
+{% block page_title %}Schedule builder{% endblock %}
+{% block page_actions %}
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'core:event_agenda' event.slug %}" target="_blank"><i class="bi bi-eye me-1"></i>Public agenda</a>
+  <a class="btn btn-primary btn-sm" href="{% url 'organizer:session_create' event.pk %}"><i class="bi bi-plus-lg me-1"></i>Add session</a>
+{% endblock %}
+{% block dash %}
+<p class="small text-body-secondary">Event runs {{ event.starts_at|date:"D j M, H:i" }} – {{ event.ends_at|date:"D j M, H:i" }}. Sessions are grouped by room/track; overlaps in the same room are highlighted.</p>
+<div class="eh-schedule" data-rooms='{{ rooms|join:"|" }}'>
+  <div class="row g-3">
+  {% for room in rooms %}
+    <div class="col-md-6 col-xxl-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent fw-semibold"><i class="bi bi-door-open me-1"></i>{{ room }}</div>
+        <div class="card-body eh-room" data-room="{{ room }}">
+          {% for ss in sessions %}{% if ss.room == room or not ss.room and room == "Main" %}
+            <div class="eh-session eh-kind-{{ ss.kind }} p-2 mb-2 rounded-3" data-start="{{ ss.starts_at|date:'c' }}" data-end="{{ ss.ends_at|date:'c' }}">
+              <div class="d-flex justify-content-between small"><span class="fw-semibold">{{ ss.starts_at|date:"D H:i" }} – {{ ss.ends_at|time:"H:i" }}</span><span class="badge eh-kind-badge">{{ ss.get_kind_display }}</span></div>
+              <div class="fw-semibold">{{ ss.title }}</div>
+              <div class="small text-body-secondary">{% for sp in ss.speakers.all %}{{ sp.name }}{% if not forloop.last %}, {% endif %}{% empty %}No speaker{% endfor %}</div>
+              <div class="mt-1 small"><a href="{% url 'organizer:session_edit' event.pk ss.pk %}">Edit</a> · <a class="text-danger" href="{% url 'organizer:session_delete' event.pk ss.pk %}">Delete</a></div>
+              <div class="eh-overlap small text-danger d-none"><i class="bi bi-exclamation-triangle"></i> Overlaps another session in this room</div>
+            </div>
+          {% endif %}{% endfor %}
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12"><div class="p-5 text-center bg-body-tertiary rounded-4">No sessions yet. <a href="{% url 'organizer:session_create' event.pk %}">Add the first one</a>.</div></div>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

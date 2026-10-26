@@ -1,0 +1,19 @@
+{% extends "organizer/base.html" %}
+{% block title %}Venues{% endblock %}
+{% block page_title %}Venues{% endblock %}
+{% block page_actions %}<a class="btn btn-primary btn-sm" href="{% url 'organizer:venue_create' %}"><i class="bi bi-plus-lg me-1"></i>Add venue</a>{% endblock %}
+{% block dash %}
+<div class="row row-cols-1 row-cols-md-2 row-cols-xxl-3 g-3">
+  {% for v in venues %}
+    <div class="col"><div class="card border-0 shadow-sm h-100"><div class="card-body">
+      <div class="d-flex justify-content-between"><h2 class="h6 fw-semibold">{{ v.name }}</h2>
+        <div class="text-nowrap"><a href="{% url 'organizer:venue_edit' v.pk %}"><i class="bi bi-pencil"></i></a><a class="text-danger ms-2" href="{% url 'organizer:venue_delete' v.pk %}"><i class="bi bi-trash"></i></a></div></div>
+      <p class="small text-body-secondary mb-2"><i class="bi bi-geo-alt me-1"></i>{{ v.full_address }}</p>
+      <div class="small">{% if v.capacity %}<span class="me-3"><i class="bi bi-people me-1"></i>{{ v.capacity }} capacity</span>{% endif %}<span><i class="bi bi-calendar-event me-1"></i>{{ v.n_events }} event{{ v.n_events|pluralize }}</span></div>
+      {% if v.map_url %}<a class="small d-inline-block mt-2" href="{{ v.map_url }}" target="_blank" rel="noopener">Open map</a>{% endif %}
+    </div></div></div>
+  {% empty %}
+    <div class="col-12"><div class="p-5 text-center bg-body-tertiary rounded-4">No venues yet. <a href="{% url 'organizer:venue_create' %}">Add one</a> to use it across events.</div></div>
+  {% endfor %}
+</div>
+{% endblock %}

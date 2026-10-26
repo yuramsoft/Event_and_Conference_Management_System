@@ -1,0 +1,30 @@
+{% extends base_template %}
+{% block title %}Profile{% endblock %}
+{% block page_title %}Profile{% endblock %}
+{% block dash %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm"><div class="card-body p-4">
+      <h2 class="h6 fw-semibold mb-3">Personal details</h2>
+      <p class="small text-body-secondary">Signed in as <strong>{{ user.email }}</strong> · {{ user.get_role_display }}</p>
+      <form method="post" enctype="multipart/form-data">{% csrf_token %}
+        {% include "partials/form_fields.html" %}
+        <button class="btn btn-primary mt-3">Save profile</button>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm"><div class="card-body p-4">
+      <h2 class="h6 fw-semibold mb-3">Change password</h2>
+      <form method="post">{% csrf_token %}
+        <input type="hidden" name="change_password" value="1">
+        {% for field in pw_form %}
+          <div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}
+            {% for e in field.errors %}<div class="invalid-feedback d-block">{{ e }}</div>{% endfor %}</div>
+        {% endfor %}
+        <button class="btn btn-outline-primary">Update password</button>
+      </form>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

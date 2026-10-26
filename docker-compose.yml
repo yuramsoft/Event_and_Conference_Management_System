@@ -1,0 +1,58 @@
+x-app: &app
+  build: .
+  env_file: .env
+  environment:
+    DB_ENGINE: mysql
+    MYSQL_HOST: db
+    REDIS_URL: redis://redis:6379/0
+  volumes:
+    - media:/app/media
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_started
+  restart: unless-stopped
+
+services:
+  db:
+    image: mysql:8.0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-eventhandler}
+      MYSQL_USER: ${MYSQL_USER:-eventhandler}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-eventhandler}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  web:
+    <<: *app
+    environment:
+      DB_ENGINE: mysql
+      MYSQL_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      RUN_MIGRATIONS: "1"
+    ports:
+      - "8000:8000"
+
+  worker:
+    <<: *app
+    command: celery -A config worker -l info --concurrency 2
+
+  beat:
+    <<: *app
+    command: celery -A config beat -l info
+
+volumes:
+  mysql_data:
+  media:

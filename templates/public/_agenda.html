@@ -1,0 +1,25 @@
+{% for day, sessions in agenda_days %}
+  <h3 class="h6 text-uppercase text-body-secondary fw-semibold mt-4 mb-3">{{ day|date:"l, j F" }}</h3>
+  <div class="eh-timeline">
+    {% for s in sessions %}
+      <div class="eh-timeline-item eh-kind-{{ s.kind }}">
+        <div class="eh-timeline-time">{{ s.starts_at|time:"g:i A" }}<span class="d-block small text-body-secondary">{{ s.duration_minutes }} min</span></div>
+        <div class="eh-timeline-body">
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+            <span class="badge rounded-pill eh-kind-badge">{{ s.get_kind_display }}</span>
+            {% if s.room %}<span class="small text-body-secondary"><i class="bi bi-door-open me-1"></i>{{ s.room }}</span>{% endif %}
+          </div>
+          <div class="fw-semibold">{{ s.title }}</div>
+          {% if s.description %}<p class="small text-body-secondary mb-1">{{ s.description|truncatewords:40 }}</p>{% endif %}
+          {% if s.speakers.all %}
+            <div class="d-flex flex-wrap gap-2 mt-1">
+              {% for sp in s.speakers.all %}<span class="small"><span class="eh-avatar eh-avatar-sm">{{ sp.initials }}</span> {{ sp.name }}</span>{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% empty %}
+  <p class="text-body-secondary">The agenda will be published soon.</p>
+{% endfor %}
